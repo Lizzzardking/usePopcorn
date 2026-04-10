@@ -1,52 +1,45 @@
-# 🍿 usePopcorn
+# 🍿 usePopcorn | React Component Architecture
 
-> A highly modular movie library application built with React, focusing on component composition and state management.
+> A specialized study in component composition, reusability, and modular state management within the React ecosystem.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Status](https://img.shields.io/badge/Status-Learning_In_Progress-yellow?style=for-the-badge)](https://github.com/YourUsername)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-## 🎯 The Project
-`usePopcorn` is a movie tracking application that allows users to search for films, view detailed information via the OMDb API, and manage a personal "watched" list with custom ratings.
+## 🏗 The Evolution: Beyond the CMS
+**With over 13 years of experience as a Senior Designer and Web Developer, I am not new to code.** My background includes years of building custom web solutions within the **WordPress ecosystem**. 
 
-This project is a core part of my transition from **Senior Designer to Creative UI Engineer**. While the logic follows the Jonas Schmedtmann curriculum, my implementation focuses on clean architecture and production-ready component structures.
+However, this project marks my strategic shift from **"CMS-driven development"** to **Modern UI Engineering**:
+- **Modernizing the Stack:** Transitioning from monolithic PHP/WordPress structures to decoupled, component-based React architecture.
+- **Engineering Mindset:** Moving away from "plug-in thinking" to building custom, scalable logic from the ground up.
+- **Component Mastery:** Using this project to master complex patterns like *Component Composition* and *State Lifting*.
 
-## 🧠 Engineering Focus: Section 10 Highlights
-In this phase of the project, I tackled complex React patterns that go beyond basic rendering:
+## 🎯 Project Goals
+`usePopcorn` is a movie database application where I focus on the "under the hood" mechanics of React. It allows users to search for films via the OMDb API, view details, and manage a personalized "watched" list with a custom rating system.
 
-- **Component Composition:** Utilizing the `children` prop to avoid "Prop Drilling" and create a highly flexible UI structure.
-- **Reusability:** Developed a custom, stateless **Star Rating component** designed to be dropped into any project requiring user feedback.
-- **State Lifting:** Managing complex inter-component communication to ensure a "Single Source of Truth."
-- **API Integration:** Handling side effects and asynchronous data fetching from external movie databases.
+### Key Engineering Concepts (Section 10 Mastery)
+- **Component Composition:** Using the `children` prop to create flexible layouts and eliminate "Prop Drilling."
+- **Stateless Reusability:** Developed a highly decoupled **Star Rating component** designed for multi-project integration.
+- **Effect Management:** Handling side effects and asynchronous data fetching while ensuring UI synchronization.
+- **Prop Types & Validation:** Ensuring robust data flow between parent and child components.
 
-## 🛠 Tech Stack
-- **Library:** React.js
-- **Pattern:** Component Composition & Custom Hooks
-- **Styling:** Modular CSS (Refactoring towards a design-system-led approach)
-- **API:** OMDb (Open Movie Database)
+### 🧠 Why This Project?
+While the visual interface is guided by the Jonas Schmedtmann curriculum, my implementation serves as a technical laboratory. For a Creative UI Engineer, the goal is not just to "make it work," but to ensure the code is as polished and professional as the design.
 
-## ✨ Key Features
-- [x] **Real-time Search:** Dynamic fetching of movie data as the user types.
-- [x] **Interactive Rating:** A custom-built star component with hover states and persistent rating logic.
-- [x] **Watchlist Management:** Tracking watched movies, average ratings, and runtime stats.
-- [ ] **Custom Hooks:** (Upcoming) Refactoring logic into reusable `useMovies` and `useLocalStorage` hooks.
-
-## 🚀 Why This Matters
-As a developer coming from a **13-year background in Design and WordPress development**, I use this project to master the "under the hood" mechanics of React. It’s not just about making it look good—it's about making the code **scalable, readable, and maintainable.**
-
----
 
 ### 🛠 Installation & Setup
 1. Clone the repository:
-   ```bash
-   git clone [https://github.com/](https://github.com/)Lizzzardking/usePopcorn.git
+   
+   ``bash
+   git clone [https://github.com/](https://github.com/)Lizzzardking/usePopcorn.git``
 
-2. Install dependencies:
+3. Install dependencies:
 
- `bash
-    npm install`
+ ``bash
+    npm install``
 
 3. Run the development server:
- `Bash
- npm run dev`
+ ``bash
+ npm run dev``
 
 Developed by Greg Telakis — Documenting the journey to Creative UI Engineering.
