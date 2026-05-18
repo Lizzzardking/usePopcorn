@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
 
 const tempMovieData = [
@@ -53,8 +53,26 @@ const average = (arr) =>
 
 //STRUCTURAL COMPONENT
 export default function App() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState([]);
+  const [movies, setMovies] = useState([]);
+  const query = "clueless";
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(function () {
+    async function fetchMovies() {
+      setIsLoading(true);
+      const res = await fetch(
+        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+      );
+      const data = await res.json();
+      setMovies(data.Search);
+      setIsLoading(false);
+    }
+    fetchMovies();
+  }, []);
+
+  const KEY = "412fff02";
+
   return (
     <>
       <NavBar>
@@ -73,9 +91,7 @@ export default function App() {
           }
         /> */}
 
-        <Box>
-          <MovieList movies={movies} />
-        </Box>
+        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMovieList watched={watched} />
@@ -84,6 +100,11 @@ export default function App() {
     </>
   );
 }
+
+function Loader() {
+  return <p className="loader">Loading...</p>;
+}
+
 //STRUCTURAL COMPONENT - responsible for how things are structured, not how they look or work
 function NavBar({ children }) {
   return (
