@@ -81,14 +81,17 @@ export default function App() {
 
   console.log("During render");*/
 
+  // this function will be passed down to the MovieList component, and will be called when a movie is clicked, it will set the selectedId state to the id of the clicked movie, which will trigger the MovieDetails component to fetch and display the details of the selected movie.
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
 
+  //
   function handleCloseMovie() {
     setSelectedId(null);
   }
 
+  // this function will be passed down to the MovieDetails component, and will be called when the user clicks the "Add to List" button, it will add the movie to the watched list by updating the state with the new list that includes the new movie.
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
   }
@@ -99,21 +102,27 @@ export default function App() {
 
   useEffect(
     function () {
+      const controller = new AbortController(); // this controller will be used to abort the fetch request if the component unmounts or if the query changes before the fetch is completed, preventing potential memory leaks and ensuring that we don't update state on an unmounted component.
+
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError(""); // reset error before new fetch
           const res = await fetch(
             `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal },
           );
 
           if (!res.ok) throw new Error("Something went wrong fetching movies");
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not found");
           setMovies(data.Search);
+          setError("");
         } catch (err) {
-          console.error(err.message);
-          setError(err.message);
+          if (err.name !== "AbortError") {
+            console.log(err.message);
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -123,7 +132,11 @@ export default function App() {
         setError("");
         return;
       }
+      handleCloseMovie();
       fetchMovies();
+      return function () {
+        controller.abort(); // this will abort the fetch request if the component unmounts or if the query changes before the fetch is completed, preventing potential memory leaks and ensuring that we don't update state on an unmounted component.
+      };
     },
     [query],
   );
@@ -342,6 +355,22 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onCloseMovie();
   }
 
+  // this useEffect will run every time the selectedId changes, which means every time a new movie is selected, the movie details will be fetched and displayed
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+      document.addEventListener("keydown", callback);
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie],
+  );
+
   useEffect(
     function () {
       async function getMovieDetails() {
@@ -357,6 +386,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     },
     [selectedId], // this useEffect will run every time the selectedId changes, which means every time a new movie is selected, the movie details will be fetched and displayed
   ); //each time the component renders
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      // Cleanup function to reset the document title when the component unmounts or when the title changes
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+    [title],
+  ); // this useEffect will run every time the title changes, which means every time a new movie is selected and its details are fetched, the document title will be updated to reflect the selected movie. The cleanup function is not needed here because we are not setting up any subscriptions or event listeners that need to be cleaned up when the component unmounts or when the effect re-runs.
 
   return (
     <div className="details">
