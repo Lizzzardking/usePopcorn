@@ -1,5 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
+
+const tempMovieData = [
+  {
+    imdbID: "tt1375666",
+    Title: "Inception",
+    Year: "2010",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+  },
+  {
+    imdbID: "tt0133093",
+    Title: "The Matrix",
+    Year: "1999",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+  },
+  {
+    imdbID: "tt6751668",
+    Title: "Parasite",
+    Year: "2019",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
+  },
+];
+
+const tempWatchedData = [
+  {
+    imdbID: "tt1375666",
+    Title: "Inception",
+    Year: "2010",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+    runtime: 148,
+    imdbRating: 8.8,
+    userRating: 10,
+  },
+  {
+    imdbID: "tt0088763",
+    Title: "Back to the Future",
+    Year: "1985",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    runtime: 116,
+    imdbRating: 8.5,
+    userRating: 9,
+  },
+];
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -9,15 +56,30 @@ const KEY = "412fff02";
 //STRUCTURAL COMPONENT
 export default function App() {
   const [query, setQuery] = useState("");
+  const [watched, setWatched] = useState([]);
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  // const [watched, setWatched] = useState([]);
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue); // this will parse the stored JSON string back into a JavaScript array, which will be used as the initial state for the watched movies. If there is no stored value, it will return null, which will be treated as an empty array in the rest of the code.
+  // const tempQuery = "clueless";
+
+  /*
+  useEffect(function () {
+    console.log("After initial render");
+  }, []);
+
+  useEffect(function () {
+    console.log("After every render");
   });
+
+  useEffect(
+    function () {
+      console.log("D");
+    },
+    [query],
+  );
+
+  console.log("During render");*/
 
   // this function will be passed down to the MovieList component, and will be called when a movie is clicked, it will set the selectedId state to the id of the clicked movie, which will trigger the MovieDetails component to fetch and display the details of the selected movie.
   function handleSelectMovie(id) {
@@ -32,19 +94,11 @@ export default function App() {
   // this function will be passed down to the MovieDetails component, and will be called when the user clicks the "Add to List" button, it will add the movie to the watched list by updating the state with the new list that includes the new movie.
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
-    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   } // this function will be passed down to the WatchedMovie component, and will be called when the delete button is clicked, it will filter out the movie with the given id from the watched list, and update the state with the new list.
-
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched],
-  );
 
   useEffect(
     function () {
@@ -173,29 +227,6 @@ function Logo() {
 
 //STATEFUL COMPONENT - responsible for how things work, not how they look
 function Search({ query, setQuery }) {
-  const inputEl = useRef(null); // this ref will be used to reference the input element in the DOM, allowing us to programmatically focus it when the user presses "Enter" and to check if it is currently focused before triggering the focus again.
-
-  useEffect(
-    function () {
-      function callback(e) {
-        if (document.activeElement === inputEl.current) return; // this will check if the input element is currently focused, if it is, it will not trigger the focus again when the user presses "Enter", allowing the user to type in the search query without interruption. If the input element is not focused, pressing "Enter" will focus the input element and clear the search query, allowing the user to quickly start a new search.
-
-        if (e.code === "Enter") {
-          inputEl.current.focus();
-          setQuery(""); // this will clear the search query when the user presses "Enter" while the input element is not focused, allowing the user to quickly start a new search without having to manually clear the previous query.
-        }
-      }
-      document.addEventListener("keydown", callback);
-      return () => document.addEventListener("keydown", callback);
-    },
-    [setQuery],
-  );
-
-  // useEffect(function () {
-  //   const el = document.querySelector(".search");
-  //   el.focus();
-  // }, []);
-
   return (
     <input
       className="search"
@@ -203,7 +234,6 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
-      ref={inputEl}
     />
   );
 }
@@ -290,16 +320,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
-  const countRef = useRef(0);
-
-  useEffect(
-    function () {
-      if (userRating) {
-        countRef.current = countRef.current++;
-      }
-    },
-    [userRating],
-  );
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   console.log(isWatched); // this will log true if the movie is already in the watched list, false otherwise
@@ -307,9 +327,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const watchedUserRating = watched.find(
     (movie) => movie.imdbID === selectedId,
   )?.userRating; // this will find the movie in the watched list that has the same imdbID as the selectedId, and return its userRating, if it exists. If it doesn't exist, it will return undefined. The optional chaining operator is used to avoid errors if the movie is not found in the watched list.
-
-  // /* eslint-disable */
-  // if (imdbRating > 8) [isTop, setIsTop] = useState(true);
 
   const {
     Title: title,
@@ -333,7 +350,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split("").at(0)),
       userRating,
-      countRatingDecisions: countRef.current,
     };
     onAddWatched(newWatchedMovie);
     onCloseMovie();
@@ -407,7 +423,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </p>
             </div>
           </header>
-
           <section>
             <div className="rating">
               {!isWatched ? (
