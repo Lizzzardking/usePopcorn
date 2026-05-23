@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
+import { useKey } from "./useKey";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -9,15 +12,10 @@ const KEY = "412fff02";
 //STRUCTURAL COMPONENT
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  // const [watched, setWatched] = useState([]);
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue); // this will parse the stored JSON string back into a JavaScript array, which will be used as the initial state for the watched movies. If there is no stored value, it will return null, which will be treated as an empty array in the rest of the code.
-  });
+
+  const { movies, isLoading, error } = useMovies(query);
+  const [watched, setWatched] = useLocalStorageState([], "watched"); // this is a custom hook that we will create to manage the state of the watched movies, and to persist it in localStorage so that it is not lost when the user refreshes the page.
 
   // this function will be passed down to the MovieList component, and will be called when a movie is clicked, it will set the selectedId state to the id of the clicked movie, which will trigger the MovieDetails component to fetch and display the details of the selected movie.
   function handleSelectMovie(id) {
@@ -38,54 +36,6 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   } // this function will be passed down to the WatchedMovie component, and will be called when the delete button is clicked, it will filter out the movie with the given id from the watched list, and update the state with the new list.
-
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched],
-  );
-
-  useEffect(
-    function () {
-      const controller = new AbortController(); // this controller will be used to abort the fetch request if the component unmounts or if the query changes before the fetch is completed, preventing potential memory leaks and ensuring that we don't update state on an unmounted component.
-
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError(""); // reset error before new fetch
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal },
-          );
-
-          if (!res.ok) throw new Error("Something went wrong fetching movies");
-          const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found");
-          setMovies(data.Search);
-          setError("");
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            console.log(err.message);
-            setError(err.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-      handleCloseMovie();
-      fetchMovies();
-      return function () {
-        controller.abort(); // this will abort the fetch request if the component unmounts or if the query changes before the fetch is completed, preventing potential memory leaks and ensuring that we don't update state on an unmounted component.
-      };
-    },
-    [query],
-  );
 
   return (
     <>
@@ -175,26 +125,11 @@ function Logo() {
 function Search({ query, setQuery }) {
   const inputEl = useRef(null); // this ref will be used to reference the input element in the DOM, allowing us to programmatically focus it when the user presses "Enter" and to check if it is currently focused before triggering the focus again.
 
-  useEffect(
-    function () {
-      function callback(e) {
-        if (document.activeElement === inputEl.current) return; // this will check if the input element is currently focused, if it is, it will not trigger the focus again when the user presses "Enter", allowing the user to type in the search query without interruption. If the input element is not focused, pressing "Enter" will focus the input element and clear the search query, allowing the user to quickly start a new search.
-
-        if (e.code === "Enter") {
-          inputEl.current.focus();
-          setQuery(""); // this will clear the search query when the user presses "Enter" while the input element is not focused, allowing the user to quickly start a new search without having to manually clear the previous query.
-        }
-      }
-      document.addEventListener("keydown", callback);
-      return () => document.addEventListener("keydown", callback);
-    },
-    [setQuery],
-  );
-
-  // useEffect(function () {
-  //   const el = document.querySelector(".search");
-  //   el.focus();
-  // }, []);
+  useKey("Enter", function () {
+    if (document.activeElement === inputEl.current) return;
+    inputEl.current.focus();
+    setQuery("");
+  });
 
   return (
     <input
@@ -339,21 +274,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onCloseMovie();
   }
 
-  // this useEffect will run every time the selectedId changes, which means every time a new movie is selected, the movie details will be fetched and displayed
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code === "Escape") {
-          onCloseMovie();
-        }
-      }
-      document.addEventListener("keydown", callback);
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [onCloseMovie],
-  );
+  useKey("Escape", onCloseMovie);
 
   useEffect(
     function () {
